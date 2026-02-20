@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRO 4.0 Ultra - AMOLED 3D</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode" defer></script>
+
+    <style>
+        /* [O CSS FOI TOTALMENTE MANTIDO - Design AMOLED Haptic 3D] */
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(180deg, #00152e 0%, #000000 50%);
+            background-attachment: fixed;
+            color: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+            perspective: 1000px;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent; /* Remove o flash azul nativo do celular ao clicar */
+        }
+
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(180deg, #00152e 0%, #000000 50%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .splash-card {
+            background: linear-gradient(145deg, #111111, #050505);
+            padding: 40px 50px;
+            border-radius: 20px;
+            border-top: 3px solid #00BFFF;
+            box-shadow: inset 0 15px 15px -15px rgba(0, 191, 255, 0.4), 
+                        0 8px 0 #000000, 
+                        0 25px 35px rgba(0,0,0,0.95);
+            text-align: center;
+            transform-style: preserve-3d;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .splash-card h1 {
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 2.2em;
+            text-shadow: 0 4px 6px rgba(0,0,0,0.9);
+            margin: 0;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+
+        @keyframes cascadeIn {
+            0% { opacity: 0; transform: translateY(40px) scale(0.95) rotateX(-10deg); }
+            100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0); }
+        }
+
+        .cascade-item { opacity: 0; }
+        .start-cascade .cascade-item {
+            animation: cascadeIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+
+        .start-cascade .item-1 { animation-delay: 0.1s; }
+        .start-cascade .item-2 { animation-delay: 0.25s; }
+        .start-cascade .item-3 { animation-delay: 0.4s; }
+        .start-cascade .item-4 { animation-delay: 0.55s; }
+
+        .container {
+            background: linear-gradient(145deg, #111111, #050505);
+            padding: 30px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 450px;
+            border-top: 3px solid #00BFFF;
+            box-shadow: inset 0 15px 15px -15px rgba(0, 191, 255, 0.4), 
+                        0 6px 0 #000000, 
+                        0 15px 20px rgba(0,0,0,0.9);
+            transform-style: preserve-3d;
+            opacity: 0; 
+            transition: opacity 0.5s ease;
+        }
+
+        h2 { text-align: center; margin-bottom: 25px; color: #ffffff; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
+        .input-group { display: flex; flex-direction: column; gap: 15px; }
+
+        input {
+            background: #050505; border: 1px solid #1a1a1a; padding: 16px;
+            border-radius: 12px; color: #00BFFF; font-size: 16px; font-weight: bold;
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.9); outline: none;
+            text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        input:focus {
+            border-color: #00BFFF;
+            box-shadow: inset 0 4px 8px rgba(0, 0, 0, 0.9), 0 0 10px rgba(0, 191, 255, 0.2);
+        }
+
+        button, .full-history-link {
+            background: linear-gradient(145deg, #111111, #050505);
+            color: white; border: none; padding: 16px; border-radius: 12px;
+            font-size: 16px; font-weight: bold; cursor: pointer; border-top: 3px solid #4364F7;
+            box-shadow: inset 0 15px 15px -15px rgba(67, 100, 247, 0.6), 0 6px 0 #000000, 0 15px 20px rgba(0,0,0,0.9);
+            transition: transform 0.1s ease, box-shadow 0.1s ease, border-color 0.1s ease;
+            transform-style: preserve-3d; display: flex; justify-content: center;
+            align-items: center; gap: 10px; text-decoration: none; user-select: none;
+        }
+
+        .btn-scan {
+            border-top-color: #00E676;
+            box-shadow: inset 0 15px 15px -15px rgba(0, 230, 118, 0.4), 0 6px 0 #000000, 0 15px 20px rgba(0,0,0,0.9);
+        }
+
+        .btn-cancel {
+            border-top-color: #ff4d4d;
+            box-shadow: inset 0 15px 15px -15px rgba(255, 77, 77, 0.4), 0 6px 0 #000000, 0 15px 20px rgba(0,0,0,0.9);
+            margin-top: 20px;
+        }
+
+        button:active, .full-history-link:active {
+            transform: translateY(6px) scale(0.97);
+            border-top-color: transparent;
+            box-shadow: inset 0 10px 15px rgba(0,0,0,0.9), 0 0px 0 #000000, 0 5px 10px rgba(0,0,0,0.5);
+        }
+
+        .icon-3d {
+            text-shadow: -1px -1px 1px rgba(255, 255, 255, 0.3), 2px 2px 3px rgba(0, 0, 0, 0.9), 4px 4px 5px rgba(0, 0, 0, 0.8);
+            transform: translateZ(10px); filter: drop-shadow(0 4px 4px rgba(0,0,0,0.6));
+        }
+
+        /* Modal e Scanners */
+        #scanner-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); display: flex;
+            justify-content: center; align-items: center; z-index: 10000; opacity: 0;
+            pointer-events: none; transition: opacity 0.4s ease;
+        }
+        #scanner-modal.show { opacity: 1; pointer-events: auto; }
+
+        .scanner-card {
+            background: linear-gradient(145deg, #111111, #050505); padding: 25px; border-radius: 20px;
+            border-top: 3px solid #00E676; box-shadow: inset 0 15px 15px -15px rgba(0, 230, 118, 0.4), 0 6px 0 #000000, 0 20px 30px rgba(0,0,0,0.95);
+            width: 90%; max-width: 400px; transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+            text-align: center;
+        }
+        #scanner-modal.show .scanner-card { transform: scale(1); }
+
+        #reader {
+            width: 100%; border-radius: 12px; overflow: hidden; box-shadow: inset 0 4px 10px rgba(0,0,0,0.9);
+            border: 2px solid #1a1a1a; margin-top: 15px; background: #000;
+        }
+        #reader video { border-radius: 12px; }
+
+        .loading {
+            text-align: center; color: #FFD700; font-weight: bold; display: none;
+            margin-top: 25px; animation: pulse 1.5s infinite, cascadeIn 0.5s forwards;
+        }
+        @keyframes pulse { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+        .result-wrapper { margin-top: 25px; transition: opacity 0.3s ease, transform 0.3s ease; }
+        .screen-exit { opacity: 0 !important; transform: scale(0.92) !important; }
+
+        .timeline-item {
+            background: linear-gradient(145deg, #111111, #050505); padding: 18px; border-radius: 15px;
+            margin-bottom: 20px; border-top: 3px solid #FFD700;
+            box-shadow: inset 0 15px 15px -15px rgba(255, 215, 0, 0.4), 0 6px 0 #000000, 0 15px 20px rgba(0,0,0,0.9);
+            transform-style: preserve-3d; opacity: 0; animation: cascadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+        }
+        .timeline-item.latest {
+            border-top-color: #00BFFF;
+            box-shadow: inset 0 15px 15px -15px rgba(0, 191, 255, 0.4), 0 6px 0 #000000, 0 15px 20px rgba(0,0,0,0.9);
+        }
+        .timeline-item.error {
+            border-top-color: #ff4d4d;
+            box-shadow: inset 0 15px 15px -15px rgba(255, 77, 77, 0.4), 0 6px 0 #000000, 0 15px 20px rgba(0,0,0,0.9);
+        }
+
+        .status-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .status-title { font-weight: bold; color: #ffffff; font-size: 1.05em; }
+        .latest .status-title { color: #00BFFF; }
+        .error .status-title { color: #ff4d4d; }
+        .status-date { font-size: 0.85em; color: #FFD700; margin-bottom: 8px; font-weight: bold; }
+        .status-loc { font-size: 0.9em; color: #888888; line-height: 1.4; }
+        .current-status-display { margin-bottom: 25px; text-align: center; opacity: 0; animation: cascadeIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen">
+        <div class="splash-card">
+            <h1><i class="fa-solid fa-box-open icon-3d" style="color: #00BFFF; margin-bottom: 15px; font-size: 1.5em; display: block;"></i>SRO 4.0 Ultra</h1>
+        </div>
+    </div>
+
+    <div id="scanner-modal">
+        <div class="scanner-card">
+            <h3 style="color: #00E676; margin-bottom: 10px;">
+                <i class="fa-solid fa-camera icon-3d"></i> Câmera
+            </h3>
+            <p style="font-size: 0.85em; color: #888;">Aponte para o código de barras ou QR Code</p>
+            <div id="reader"></div>
+            <button class="btn-cancel" onclick="closeScanner()">
+                <i class="fa-solid fa-xmark icon-3d"></i> Cancelar
+            </button>
+        </div>
+    </div>
+
+    <div class="container" id="app-container">
+        <h2 class="cascade-item item-1">
+            <i class="fa-solid fa-box-open icon-3d" style="color: #00BFFF; margin-right: 10px;"></i>SRO 4.0 Ultra
+        </h2>
+        
+        <div class="input-group">
+            <input type="text" id="trackingCode" class="cascade-item item-2" placeholder="Código (Ex: AB123456789BR)" maxlength="13" autocomplete="off">
+            
+            <button id="scanBtn" class="cascade-item item-3 btn-scan" onclick="openScanner()">
+                <i class="fa-solid fa-barcode icon-3d" style="color: #00E676;"></i> Ler por Câmera
+            </button>
+
+            <button id="trackBtn" class="cascade-item item-4" onclick="trackPackage()">
+                <i class="fa-solid fa-magnifying-glass icon-3d"></i> Buscar Objeto
+            </button>
+        </div>
+        
+        <div id="loading" class="loading">
+            <i class="fa-solid fa-satellite-dish icon-3d" style="margin-right: 8px;"></i> Consultando base...
+        </div>
+        
+        <div id="result-wrapper" class="result-wrapper" style="display: none;">
+            <div id="result"></div>
+        </div>
+    </div>
+
+    <script>
+        /* =========================================================
+           MOTOR HAPTIC & SINTETIZADOR DE ÁUDIO 3D (Native API)
+           ========================================================= */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let startupPlayed = false;
+
+        // Desbloqueia o áudio no primeiro toque do usuário (política de navegadores)
+        const initAudioEngine = () => {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            if (!startupPlayed) {
+                playStartupSound();
+                startupPlayed = true;
+            }
+            // Remove os ouvintes após o primeiro toque
+            document.removeEventListener('pointerdown', initAudioEngine);
+            document.removeEventListener('keydown', initAudioEngine);
+        };
+        document.addEventListener('pointerdown', initAudioEngine);
+        document.addEventListener('keydown', initAudioEngine);
+
+        // 1. Som de Clique Tátil Seco (Tick)
+        function playTickSound() {
+            if (audioCtx.state === 'suspended') return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sine'; // Onda suave
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.04); // Cai rápido, som "seco"
+            
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); // Volume baixo, discreto
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+
+        // 2. Som de Inicialização (Chime estilo iPhone)
+        function playStartupSound() {
+            if (audioCtx.state === 'suspended') return;
+            const time = audioCtx.currentTime;
+            
+            // Cria duas notas musicais juntas (Acorde)
+            const playNote = (freq, startTime, duration) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(0.15, startTime + 0.05); // Fade in rápido
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration); // Cauda longa e suave
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            };
+
+            playNote(880, time, 0.6);        // Nota A5
+            playNote(1108.73, time + 0.1, 0.8); // Nota C#6 atrasada
+        }
+
+        // 3. Som de Sucesso na Câmera (Beep Beep clássico de Scanner)
+        function playScannerSuccessSound() {
+            if (audioCtx.state === 'suspended') return;
+            const time = audioCtx.currentTime;
+            
+            const playBeep = (startTime) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square'; // Som eletrônico
+                osc.frequency.setValueAtTime(1760, startTime); // Frequência aguda
+                
+                gain.gain.setValueAtTime(0.05, startTime);
+                gain.gain.setValueAtTime(0, startTime + 0.1);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(startTime);
+                osc.stop(startTime + 0.1);
+            };
+
+            playBeep(time);
+            playBeep(time + 0.15); // Segundo beep rápido
+        }
+
+        // 4. Vibração Haptic nativa (Pulsos curtos)
+        function triggerHaptic(pattern = 15) {
+            if (navigator.vibrate) {
+                navigator.vibrate(pattern);
+            }
+        }
+
+        // Central de Feedback Interativo (Junta o Som e a Vibração)
+        function playFeedback() {
+            playTickSound();
+            triggerHaptic(15); // Pulso físico extremamente curto e seco simulando clique real
+        }
+
+        /* =========================================================
+           GATILHOS (TRIGGERS) DE INTERAÇÃO GLOBAL
+           ========================================================= */
+        
+        // Dispara para CLIQUES em QUALQUER botão ou link (incluindo links criados depois)
+        document.addEventListener('pointerdown', (e) => {
+            // Verifica se o usuário tocou num botão, num link, ou nos filhos deles
+            const isClickable = e.target.closest('button, a');
+            if (isClickable) {
+                playFeedback();
+            }
+        });
+
+        // Dispara para DIGITAÇÃO em inputs
+        document.addEventListener('input', (e) => {
+            if (e.target.tagName.toLowerCase() === 'input') {
+                playFeedback();
+            }
+        });
+
+
+        /* =========================================================
+           LÓGICA ORIGINAL DO APLICATIVO
+           ========================================================= */
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const splashScreen = document.getElementById('splash-screen');
+            const appContainer = document.getElementById('app-container');
+
+            setTimeout(() => {
+                if(splashScreen) {
+                    splashScreen.style.opacity = '0';
+                    splashScreen.style.transform = 'scale(1.1)'; 
+
+                    setTimeout(() => {
+                        splashScreen.style.display = 'none';
+                        if(appContainer) {
+                            appContainer.style.opacity = '1';
+                            appContainer.classList.add('start-cascade');
+                        }
+                    }, 800);
+                }
+            }, 2000);
+        });
+
+        let html5QrCode;
+
+        function openScanner() {
+            const modal = document.getElementById('scanner-modal');
+            modal.classList.add('show');
+
+            if (typeof Html5Qrcode === "undefined") {
+                alert("A biblioteca da câmera ainda está carregando ou foi bloqueada.");
+                closeScanner();
+                return;
+            }
+
+            html5QrCode = new Html5Qrcode("reader");
+
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 100 }
+                },
+                (decodedText, decodedResult) => {
+                    // FEEDBACK ESPECIAL DO SCANNER
+                    playScannerSuccessSound();
+                    triggerHaptic([50, 50, 50]); // Padrão vibratório de sucesso longo
+                    
+                    document.getElementById('trackingCode').value = decodedText; 
+                    closeScanner(); 
+                    trackPackage(); 
+                },
+                (errorMessage) => { }
+            ).catch((err) => {
+                // FALLBACK OFFLINE / SEM HTTPS:
+                // Se der erro de permissão (como em content:// ou file://), avisa amigavelmente
+                alert("Erro ao iniciar a câmera ao vivo. Para que a leitura de códigos funcione diretamente, a página precisa estar em um site seguro (HTTPS) ou em modo localhost.");
+                closeScanner();
+            });
+        }
+
+        function closeScanner() {
+            const modal = document.getElementById('scanner-modal');
+            if(html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    modal.classList.remove('show');
+                }).catch(err => {
+                    modal.classList.remove('show');
+                });
+            } else {
+                modal.classList.remove('show');
+            }
+        }
+
+        const API_TOKEN = 'sr_live_6xpHxAJPw7cdTXXLQEhByqfpOlXgBCAFmbBk-FsA4Dw'; 
+        const API_URL = 'https://seurastreio.com.br/api/public/rastreio/';
+
+        async function trackPackage() {
+            const codeInput = document.getElementById('trackingCode');
+            const code = codeInput.value.trim().toUpperCase();
+            const wrapperDiv = document.getElementById('result-wrapper');
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            
+            if (!code || code.length < 9) {
+                alert('Por favor, informe um código de rastreio válido.');
+                return;
+            }
+
+            if (wrapperDiv.style.display === 'block') {
+                wrapperDiv.classList.add('screen-exit');
+                await new Promise(r => setTimeout(r, 300));
+            }
+
+            wrapperDiv.style.display = 'none';
+            resultDiv.innerHTML = '';
+            wrapperDiv.classList.remove('screen-exit');
+            
+            loadingDiv.style.display = 'block';
+
+            try {
+                const response = await fetch(`${API_URL}${code}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${API_TOKEN}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.status === 401) {
+                    let errorMessage = 'Erro de Autenticação: Verifique sua Chave de API.';
+                    if (data.helpUrl) errorMessage += `\nObtenha uma chave em: ${data.helpUrl}`;
+                    throw new Error(errorMessage);
+                }
+                if (response.status === 429) {
+                    throw new Error('Limite de consultas atingido. Tente novamente mais tarde.');
+                }
+                if (!data.success) {
+                    throw new Error(data.message || 'Objeto não encontrado ou aguardando atualização.');
+                }
+
+                renderResult(data);
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="timeline-item error" style="animation-delay: 0.1s">
+                        <div class="status-header">
+                            <i class="fa-solid fa-triangle-exclamation icon-3d" style="color: #ff4d4d;"></i>
+                            <div class="status-title">Atenção</div>
+                        </div>
+                        <div class="status-loc">${error.message}</div>
+                    </div>`;
+            } finally {
+                loadingDiv.style.display = 'none';
+                wrapperDiv.style.display = 'block';
+                codeInput.focus();
+                codeInput.select();
+            }
+        }
+
+        function renderResult(data) {
+            const container = document.getElementById('result');
+            let html = '';
+
+            if (data.eventos && data.eventos.length > 0) {
+                const eventos = data.eventos;
+                const latestStatus = data.eventoMaisRecente.descricao;
+
+                html += `
+                    <div class="current-status-display" style="animation-delay: 0.1s">
+                        <span style="color: #888; font-size: 0.9em; text-transform: uppercase; letter-spacing: 1px;">Status Atual</span><br>
+                        <span style="color: #00BFFF; font-weight: 800; font-size: 1.2em; text-shadow: 0 2px 5px rgba(0,0,0,0.8);">${latestStatus}</span>
+                    </div>`;
+
+                eventos.forEach((item, index) => {
+                    const isLatest = index === 0 ? 'latest' : '';
+                    const dateText = `${item.data} às ${item.hora}`;
+                    const locText = item.local;
+                    
+                    const delay = (index * 0.15) + 0.2; 
+                    
+                    const iconClass = isLatest ? 'fa-location-dot' : 'fa-check';
+                    const iconColor = isLatest ? '#00BFFF' : '#FFD700';
+
+                    html += `
+                    <div class="timeline-item ${isLatest}" style="animation-delay: ${delay}s">
+                        <div class="status-header">
+                            <i class="fa-solid ${iconClass} icon-3d" style="color: ${iconColor};"></i>
+                            <div class="status-title">${item.descricao}</div>
+                        </div>
+                        <div class="status-date">${dateText}</div>
+                        <div class="status-loc">${locText}</div>
+                    </div>`;
+                });
+            } else if (data.eventoMaisRecente && data.linkDetalhesCompletos) {
+                html += `
+                    <div class="timeline-item" style="animation-delay: 0.1s">
+                        <div class="status-header">
+                            <i class="fa-solid fa-circle-info icon-3d" style="color: #FFD700;"></i>
+                            <div class="status-title" style="color: #FFD700;">Atenção</div>
+                        </div>
+                        <div class="status-loc">Evento mais recente: ${data.eventoMaisRecente.descricao}</div>
+                        <a href="${data.linkDetalhesCompletos}" target="_blank" class="full-history-link" style="margin-top: 15px;">
+                            <i class="fa-solid fa-up-right-from-square icon-3d"></i> Ver Histórico
+                        </a>
+                    </div>`;
+            } else {
+                html += `
+                    <div class="timeline-item error" style="animation-delay: 0.1s">
+                        <div class="status-header">
+                            <i class="fa-solid fa-circle-xmark icon-3d" style="color: #ff4d4d;"></i>
+                            <div class="status-title">Atenção</div>
+                        </div>
+                        <div class="status-loc">Objeto não encontrado ou aguardando atualização no sistema.</div>
+                    </div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        document.getElementById('trackingCode').addEventListener('keydown', function (e) {
+            // Usa keydown para capturar antes do soltar do enter. Feedback já é tratado no 'input' global.
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                trackPackage();
+            }
+        });
+    </script>
+</body>
+</html>
