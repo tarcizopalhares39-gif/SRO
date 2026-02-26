@@ -5,7 +5,7 @@ const urlsToCache = [
   '/SRO/manifest.json',
   // Se os ícones tiverem nomes diferentes, atualize aqui:
   '/SRO/icon-192.png',
-  '/SRO/icon-512.png'
+  '/SRO/icon1-512.png'
 ];
 
 // Instala o Service Worker e guarda os arquivos no cache
