@@ -68,31 +68,43 @@
             margin: 0;
         }
 
-        /* --- ESTILOS DA ASSINATURA TARCIZO DEVELOPER --- */
+            /* --- ESTILOS DA ASSINATURA TARCIZO DEVELOPER --- */
         .developer-mark {
             font-family: 'Poppins', sans-serif;
-            color: #666666;
-            font-size: 16px;
-            letter-spacing: 2px;
-            font-weight: 400;
             text-align: center;
             width: 100%;
+            pointer-events: none; /* Evita que o texto bloqueie cliques na tela */
+        }
+
+        .mark-name {
+            color: #ffffff; /* Branco puro */
+            font-size: 16px;
+            font-weight: 600; /* Levemente em negrito */
+            letter-spacing: 2px;
+        }
+
+        .mark-title {
+            color: #ffffff; /* Branco puro */
+            font-size: 14px;
+            font-weight: 400;
+            letter-spacing: 4px; /* Mais espaçamento para dar um tom profissional */
+            margin-top: 5px; /* Espaço entre o nome e o Developer */
         }
 
         .splash-mark {
             position: absolute;
-            bottom: 80px;
+            bottom: 80px; /* Altura exata solicitada de 80px */
         }
 
         .main-mark {
             position: fixed;
-            bottom: 15px;
+            bottom: 80px; /* Altura exata solicitada de 80px */
             left: 0;
-            opacity: 0.5;
-            pointer-events: none;
             z-index: 100;
+            opacity: 1; /* Garante que na tela principal seja branco puro e sem transparência */
         }
         /* ---------------------------------------------- */
+
 
         @keyframes float {
             0% { transform: translateY(0px); }
@@ -733,6 +745,7 @@
     </script>
 </body>
 </html>
+
 
 
 
