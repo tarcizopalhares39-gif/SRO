@@ -383,26 +383,31 @@
                     });
             });
         }
-        
-        /* =========================================================
+              /* =========================================================
            MOTOR HAPTIC & SINTETIZADOR DE ÁUDIO 3D (Native API)
            ========================================================= */
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         let startupPlayed = false;
 
+        // Função super agressiva para forçar o desbloqueio do áudio no celular
         const initAudioEngine = () => {
             if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            if (!startupPlayed) {
+                audioCtx.resume().then(() => {
+                    if (!startupPlayed) {
+                        playStartupSound();
+                        startupPlayed = true;
+                    }
+                });
+            } else if (!startupPlayed) {
                 playStartupSound();
                 startupPlayed = true;
             }
-            document.removeEventListener('pointerdown', initAudioEngine);
-            document.removeEventListener('keydown', initAudioEngine);
         };
-        document.addEventListener('pointerdown', initAudioEngine);
-        document.addEventListener('keydown', initAudioEngine);
+
+        // Escuta múltiplos tipos de toque para garantir que o Chrome/Android libere o som
+        ['click', 'touchstart', 'keydown', 'pointerdown'].forEach(evt => {
+            document.addEventListener(evt, initAudioEngine, { once: true });
+        });
 
         function playTickSound() {
             if (audioCtx.state === 'suspended') return;
@@ -477,15 +482,20 @@
         }
 
         function playFeedback() {
+            // Força o desbloqueio caso o navegador tenha suspendido o áudio novamente
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             playTickSound();
             triggerHaptic(15); 
         }
 
-        document.addEventListener('pointerdown', (e) => {
-            const isClickable = e.target.closest('button, a');
-            if (isClickable) {
-                playFeedback();
-            }
+        // Trocamos 'pointerdown' por 'click' e 'touchstart' para funcionar perfeitamente em telas touch
+        ['click', 'touchstart'].forEach(evt => {
+            document.addEventListener(evt, (e) => {
+                const isClickable = e.target.closest('button, a');
+                if (isClickable) {
+                    playFeedback();
+                }
+            }, { passive: true });
         });
 
         document.addEventListener('input', (e) => {
@@ -493,11 +503,12 @@
                 playFeedback();
             }
         });
-
-
+        
         /* =========================================================
            LÓGICA ORIGINAL DO APLICATIVO
            ========================================================= */
+        
+
 
         document.addEventListener('DOMContentLoaded', () => {
             const splashScreen = document.getElementById('splash-screen');
@@ -752,6 +763,7 @@
     </script>
 </body>
 </html>
+
 
 
 
