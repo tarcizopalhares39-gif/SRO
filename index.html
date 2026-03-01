@@ -735,9 +735,10 @@
                             <div class="status-title" style="color: #FFD700;">Atenção</div>
                         </div>
                         <div class="status-loc">Evento mais recente: ${data.eventoMaisRecente.descricao}</div>
-                        <a href="${data.linkDetalhesCompletos}" target="_blank" class="full-history-link" style="margin-top: 15px;">
+                                                <a onclick="window.open('https://rastreiom3d-uknmeegv.manus.space/rastrear/' + document.getElementById('trackingCode').value.trim(), '_blank')" class="full-history-link" style="margin-top: 15px; cursor: pointer;">
                             <i class="fa-solid fa-up-right-from-square icon-3d"></i> Ver Histórico
                         </a>
+
                     </div>`;
             } else {
                 html += `
@@ -763,6 +764,7 @@
     </script>
 </body>
 </html>
+
 
 
 
