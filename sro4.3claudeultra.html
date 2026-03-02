@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SRO 4.3 Ultra - AMOLED 3D</title>
+        <title>SRO 4.3 Ultra - AMOLED 3D</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#000000">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/html5-qrcode" defer></script>
+
+    <style>
+        /* =============================================
+           VARIÁVEIS GLOBAIS — PALETA AMOLED
+        ============================================= */
+        :root {
+            --cyan:   #00BFFF;
+            --green:  #00E676;
+            --gold:   #FFD700;
+            --blue:   #4364F7;
+            --red:    #ff4d4d;
+            --bg:     #000000;
+            --card:   #0a0a0a;
+            --card2:  #111111;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: var(--bg);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px 20px 120px;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* =============================================
+           CANVAS DE PARTÍCULAS — FUNDO ANIMADO
+        ============================================= */
+        #particles-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* =============================================
+           SPLASH SCREEN
+        ============================================= */
+        #splash-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.9s ease, transform 0.9s ease;
+        }
+
+        .splash-card {
+            background: linear-gradient(145deg, #0d0d0d, #050505);
+            padding: 45px 55px;
+            border-radius: 24px;
+            border-top: 2px solid var(--cyan);
+            box-shadow:
+                0 0 0 1px rgba(0,191,255,0.08),
+                inset 0 15px 20px -15px rgba(0,191,255,0.35),
+                0 8px 0 #000,
+                0 30px 60px rgba(0,0,0,0.98),
+                0 0 80px rgba(0,191,255,0.07);
+            text-align: center;
+            animation: float 3.5s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Brilho animado no topo do card do splash */
+        .splash-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -60%;
+            width: 40%; height: 2px;
+            background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+            animation: scanline 3s ease-in-out infinite;
+        }
+
+        .splash-card h1 {
+            color: #fff;
+            font-weight: 800;
+            font-size: 2.3em;
+            letter-spacing: 1px;
+            text-shadow: 0 0 20px rgba(0,191,255,0.4), 0 4px 8px rgba(0,0,0,0.9);
+        }
+
+        .splash-logo-icon {
+            font-size: 2.8em;
+            display: block;
+            margin-bottom: 12px;
+            color: var(--cyan);
+            filter: drop-shadow(0 0 12px rgba(0,191,255,0.7));
+            animation: iconPulse 2s ease-in-out infinite;
+        }
+
+        /* =============================================
+           ASSINATURA DEVELOPER
+        ============================================= */
+        .developer-mark {
+            font-family: 'Poppins', sans-serif;
+            text-align: center;
+            width: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .mark-name {
+            color: rgba(255,255,255,0.85);
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .mark-title {
+            color: rgba(0,191,255,0.6);
+            font-size: 11px;
+            font-weight: 400;
+            letter-spacing: 5px;
+            margin-top: 4px;
+            text-transform: uppercase;
+        }
+
+        .splash-mark {
+            position: absolute;
+            bottom: 70px;
+        }
+
+        .main-mark {
+            position: fixed;
+            bottom: 65px;
+            left: 0;
+        }
+
+        /* =============================================
+           ANIMAÇÕES KEYFRAMES
+        ============================================= */
+        @keyframes float {
+            0%,100% { transform: translateY(0px) rotateX(0deg); }
+            50%      { transform: translateY(-12px) rotateX(1deg); }
+        }
+
+        @keyframes scanline {
+            0%   { left: -60%; }
+            100% { left: 160%; }
+        }
+
+        @keyframes iconPulse {
+            0%,100% { filter: drop-shadow(0 0 8px rgba(0,191,255,0.5)); }
+            50%      { filter: drop-shadow(0 0 20px rgba(0,191,255,0.9)); }
+        }
+
+        @keyframes cascadeIn {
+            0%   { opacity: 0; transform: translateY(35px) scale(0.95) rotateX(-8deg); }
+            100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0); }
+        }
+
+        @keyframes pulse {
+            0%,100% { opacity: 0.55; }
+            50%      { opacity: 1; }
+        }
+
+        @keyframes progressBar {
+            0%   { width: 0%; }
+            80%  { width: 85%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes shimmer {
+            0%   { left: -100%; }
+            100% { left: 200%; }
+        }
+
+        @keyframes borderGlow {
+            0%,100% { box-shadow: inset 0 15px 20px -15px rgba(0,191,255,0.3), 0 6px 0 #000, 0 15px 25px rgba(0,0,0,0.9), 0 0 30px rgba(0,191,255,0.04); }
+            50%      { box-shadow: inset 0 15px 20px -15px rgba(0,191,255,0.5), 0 6px 0 #000, 0 15px 25px rgba(0,0,0,0.9), 0 0 50px rgba(0,191,255,0.1); }
+        }
+
+        @keyframes timelineConnector {
+            0%   { height: 0; opacity: 0; }
+            100% { height: 100%; opacity: 1; }
+        }
+
+        /* =============================================
+           CASCADE REVEAL
+        ============================================= */
+        .cascade-item { opacity: 0; }
+        .start-cascade .cascade-item {
+            animation: cascadeIn 0.85s cubic-bezier(0.2, 0.85, 0.2, 1) forwards;
+        }
+        .start-cascade .item-1 { animation-delay: 0.05s; }
+        .start-cascade .item-2 { animation-delay: 0.2s;  }
+        .start-cascade .item-3 { animation-delay: 0.35s; }
+        .start-cascade .item-4 { animation-delay: 0.5s;  }
+
+        /* =============================================
+           CONTAINER PRINCIPAL
+        ============================================= */
+        .container {
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(160deg, #0e0e0e 0%, #050505 100%);
+            padding: 32px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 450px;
+            border-top: 2px solid var(--cyan);
+            box-shadow:
+                0 0 0 1px rgba(0,191,255,0.06),
+                inset 0 15px 20px -15px rgba(0,191,255,0.3),
+                0 6px 0 #000,
+                0 20px 40px rgba(0,0,0,0.95);
+            opacity: 0;
+            transition: opacity 0.6s ease;
+            margin-bottom: 20px;
+            animation: borderGlow 4s ease-in-out infinite;
+            overflow: hidden;
+        }
+
+        /* Linha de varredura de luz no topo do container */
+        .container::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 60%; height: 2px;
+            background: linear-gradient(90deg, transparent, rgba(0,191,255,0.5), transparent);
+            animation: scanline 5s ease-in-out infinite 2s;
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 28px;
+            color: #fff;
+            font-weight: 800;
+            font-size: 1.3em;
+            letter-spacing: 0.5px;
+            text-shadow: 0 0 15px rgba(0,191,255,0.3), 0 2px 5px rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* =============================================
+           INPUT DE RASTREIO
+        ============================================= */
+        .input-group { display: flex; flex-direction: column; gap: 14px; }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            background: #040404;
+            border: 1px solid rgba(255,255,255,0.06);
+            padding: 17px 20px;
+            border-radius: 14px;
+            color: var(--cyan);
+            font-size: 16px;
+            font-weight: 700;
+            font-family: 'Poppins', monospace;
+            box-shadow: inset 0 4px 12px rgba(0,0,0,0.95);
+            outline: none;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.35s ease;
+            text-align: center;
+        }
+
+        input::placeholder {
+            color: rgba(0,191,255,0.2);
+            font-weight: 400;
+            letter-spacing: 1px;
+            text-transform: none;
+            font-size: 13px;
+        }
+
+        input:focus {
+            border-color: rgba(0,191,255,0.4);
+            box-shadow:
+                inset 0 4px 12px rgba(0,0,0,0.95),
+                0 0 0 3px rgba(0,191,255,0.08),
+                0 0 25px rgba(0,191,255,0.12);
+        }
+
+        /* =============================================
+           BOTÕES — BASE + VARIANTES
+        ============================================= */
+        button, .full-history-link {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(160deg, #131313, #060606);
+            color: #fff;
+            border: none;
+            padding: 17px 20px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 700;
+            font-family: 'Poppins', sans-serif;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            border-top: 2px solid var(--blue);
+            box-shadow:
+                inset 0 15px 20px -15px rgba(67,100,247,0.5),
+                0 6px 0 #000,
+                0 14px 22px rgba(0,0,0,0.9);
+            transition: transform 0.12s ease, box-shadow 0.12s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            user-select: none;
+        }
+
+        /* Efeito shimmer ao hover */
+        button::after, .full-history-link::after {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+            transition: none;
+        }
+        button:hover::after, .full-history-link:hover::after {
+            animation: shimmer 0.5s ease forwards;
+        }
+
+        .btn-scan {
+            border-top-color: var(--green);
+            box-shadow: inset 0 15px 20px -15px rgba(0,230,118,0.35), 0 6px 0 #000, 0 14px 22px rgba(0,0,0,0.9);
+        }
+
+        .btn-cancel {
+            border-top-color: var(--red);
+            box-shadow: inset 0 15px 20px -15px rgba(255,77,77,0.35), 0 6px 0 #000, 0 14px 22px rgba(0,0,0,0.9);
+            flex: 1;
+            margin-top: 0;
+        }
+
+        .btn-torch {
+            border-top-color: var(--gold);
+            color: var(--gold);
+            box-shadow: inset 0 15px 20px -15px rgba(255,215,0,0.35), 0 6px 0 #000, 0 14px 22px rgba(0,0,0,0.9);
+            padding: 17px 24px;
+        }
+
+        .btn-torch.active {
+            border-top-color: #fff;
+            color: #fff;
+            box-shadow: inset 0 15px 20px -15px rgba(255,255,255,0.5), 0 6px 0 #000, 0 14px 22px rgba(0,0,0,0.9);
+        }
+
+        /* Clique 3D mecânico */
+        button:active, .full-history-link:active {
+            transform: translateY(4px) !important;
+            box-shadow: inset 0 15px 20px -15px rgba(67,100,247,0.5), 0 2px 0 #000, 0 6px 12px rgba(67,100,247,0.4) !important;
+        }
+        .btn-scan:active   { box-shadow: inset 0 15px 20px -15px rgba(0,230,118,0.4),  0 2px 0 #000, 0 6px 14px rgba(0,230,118,0.5)  !important; }
+        .btn-cancel:active { box-shadow: inset 0 15px 20px -15px rgba(255,77,77,0.4),   0 2px 0 #000, 0 6px 14px rgba(255,77,77,0.5)   !important; }
+        .btn-torch:active  { box-shadow: inset 0 15px 20px -15px rgba(255,215,0,0.4),   0 2px 0 #000, 0 6px 14px rgba(255,215,0,0.5)   !important; }
+
+        /* =============================================
+           ÍCONES 3D
+        ============================================= */
+        .icon-3d {
+            text-shadow: -1px -1px 1px rgba(255,255,255,0.25), 2px 2px 4px rgba(0,0,0,0.95);
+            filter: drop-shadow(0 3px 5px rgba(0,0,0,0.7));
+        }
+
+        /* =============================================
+           SCANNER MODAL
+        ============================================= */
+        #scanner-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.88);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center; align-items: center;
+            z-index: 10000; opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s ease;
+        }
+        #scanner-modal.show { opacity: 1; pointer-events: auto; }
+
+        .scanner-card {
+            background: linear-gradient(145deg, #0e0e0e, #050505);
+            padding: 22px;
+            border-radius: 22px;
+            border-top: 2px solid var(--green);
+            box-shadow:
+                0 0 0 1px rgba(0,230,118,0.07),
+                inset 0 15px 20px -15px rgba(0,230,118,0.35),
+                0 6px 0 #000,
+                0 25px 50px rgba(0,0,0,0.98);
+            width: 96%; max-width: 520px;
+            transform: scale(0.88) translateY(20px);
+            transition: transform 0.45s cubic-bezier(0.2, 0.85, 0.2, 1);
+            text-align: center;
+        }
+        #scanner-modal.show .scanner-card { transform: scale(1) translateY(0); }
+
+        .scanner-actions {
+            display: flex;
+            gap: 14px;
+            margin-top: 18px;
+            justify-content: center;
+        }
+
+        #reader {
+            width: 100%; border-radius: 14px; overflow: hidden;
+            box-shadow: inset 0 4px 12px rgba(0,0,0,0.95), 0 0 0 1px rgba(0,230,118,0.1);
+            border: none;
+            margin-top: 16px;
+            background: #000;
+        }
+        #reader video { border-radius: 14px; }
+
+        /* =============================================
+           LOADING — COM BARRA DE PROGRESSO
+        ============================================= */
+        .loading {
+            text-align: center;
+            display: none;
+            margin-top: 28px;
+            animation: cascadeIn 0.5s forwards;
+        }
+
+        .loading-text {
+            color: var(--gold);
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 1px;
+            animation: pulse 1.4s ease-in-out infinite;
+            margin-bottom: 14px;
+        }
+
+        .loading-bar-track {
+            width: 100%;
+            height: 3px;
+            background: rgba(255,215,0,0.08);
+            border-radius: 99px;
+            overflow: hidden;
+        }
+
+        .loading-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), #ffb300);
+            border-radius: 99px;
+            box-shadow: 0 0 10px rgba(255,215,0,0.6);
+            animation: progressBar 2.5s ease-in-out infinite;
+        }
+
+        /* =============================================
+           RESULTADOS — TIMELINE
+        ============================================= */
+        .result-wrapper {
+            margin-top: 28px;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            position: relative;
+        }
+        .screen-exit { opacity: 0 !important; transform: scale(0.92) !important; }
+
+        /* Linha vertical conectora da timeline */
+        #result {
+            position: relative;
+        }
+        #result::before {
+            content: '';
+            position: absolute;
+            left: 22px; top: 0;
+            width: 2px;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(0,191,255,0.3), rgba(255,215,0,0.1), transparent);
+            border-radius: 99px;
+        }
+
+        .timeline-item {
+            position: relative;
+            background: linear-gradient(155deg, #0e0e0e 0%, #060606 100%);
+            padding: 18px 18px 18px 24px;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            border-top: 2px solid var(--gold);
+            box-shadow:
+                inset 0 15px 20px -15px rgba(255,215,0,0.3),
+                0 5px 0 #000,
+                0 12px 20px rgba(0,0,0,0.9);
+            opacity: 0;
+            animation: cascadeIn 0.65s cubic-bezier(0.2, 0.85, 0.2, 1) forwards;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .timeline-item:hover {
+            transform: translateX(3px);
+        }
+
+        /* Ponto na linha da timeline */
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -18px; top: 50%;
+            transform: translateY(-50%);
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 8px rgba(255,215,0,0.6);
+        }
+
+        .timeline-item.latest {
+            border-top-color: var(--cyan);
+            box-shadow: inset 0 15px 20px -15px rgba(0,191,255,0.35), 0 5px 0 #000, 0 12px 20px rgba(0,0,0,0.9);
+        }
+        .timeline-item.latest::before {
+            background: var(--cyan);
+            box-shadow: 0 0 12px rgba(0,191,255,0.8);
+            width: 12px; height: 12px;
+            left: -19px;
+        }
+
+        .timeline-item.error {
+            border-top-color: var(--red);
+            box-shadow: inset 0 15px 20px -15px rgba(255,77,77,0.3), 0 5px 0 #000, 0 12px 20px rgba(0,0,0,0.9);
+        }
+        .timeline-item.error::before {
+            background: var(--red);
+            box-shadow: 0 0 8px rgba(255,77,77,0.6);
+        }
+
+        .status-header { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+        .status-title { font-weight: 700; color: #fff; font-size: 1em; }
+        .latest .status-title { color: var(--cyan); text-shadow: 0 0 10px rgba(0,191,255,0.4); }
+        .error .status-title { color: var(--red); }
+        .status-date { font-size: 0.82em; color: var(--gold); margin-bottom: 7px; font-weight: 600; letter-spacing: 0.3px; }
+        .status-loc { font-size: 0.88em; color: #777; line-height: 1.5; }
+
+        .current-status-display {
+            margin-bottom: 22px;
+            text-align: center;
+            opacity: 0;
+            animation: cascadeIn 0.6s cubic-bezier(0.2, 0.85, 0.2, 1) forwards;
+            padding: 16px;
+            background: linear-gradient(145deg, #0a0a0a, #040404);
+            border-radius: 14px;
+            border: 1px solid rgba(0,230,118,0.1);
+            box-shadow: 0 0 20px rgba(0,230,118,0.05);
+        }
+
+        /* =============================================
+           MODAL DE HISTÓRICO (NAVEGADOR INTERNO)
+        ============================================= */
+        .modal-overlay {
+            display: flex;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.75);
+            backdrop-filter: blur(8px);
+            z-index: 99999;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.35s ease;
+        }
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-content {
+            width: 100%; height: 100%;
+            background: var(--bg);
+            border: none; border-radius: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .modal-close {
+            background: #000;
+            color: var(--cyan);
+            border: none;
+            border-bottom: 1px solid rgba(0,191,255,0.12);
+            padding: 18px 22px;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 15px;
+            cursor: pointer;
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: 14px;
+            transition: background 0.2s, color 0.2s;
+            letter-spacing: 0.3px;
+        }
+        .modal-close:active {
+            background: rgba(0,191,255,0.07);
+        }
+
+        #history-iframe {
+            width: 100%; height: 100%;
+            flex-grow: 1;
+            background: #fff;
+        }
+
+    </style>
+</head>
+<body>
+
+    <canvas id="particles-canvas"></canvas>
+
+    <div id="splash-screen">
+        <div class="splash-card">
+            <i class="fa-solid fa-box-open icon-3d splash-logo-icon"></i>
+            <h1>SRO 4.3 Ultra</h1>
+        </div>
+
+            <div class="developer-mark splash-mark">
+            <div class="mark-name">TARCIZO PALHARES</div>
+            <div class="mark-title">DEVELOPER</div>
+            </div>
+    </div>
+    
+
+    <div id="scanner-modal">
+        <div class="scanner-card">
+            <h3 style="color: #00E676; margin-bottom: 10px;">
+                <i class="fa-solid fa-camera icon-3d"></i> Câmera
+            </h3>
+            <p style="font-size: 0.85em; color: #888;">Aponte para o código de barras ou QR Code</p>
+            <div id="reader"></div>
+            
+            <div class="scanner-actions">
+                <button class="btn-cancel" onclick="closeScanner()">
+                    <i class="fa-solid fa-xmark icon-3d"></i> Cancelar
+                </button>
+                <button id="torchBtn" class="btn-torch" onclick="toggleTorch()" title="Ligar/Desligar Lanterna">
+                    <i class="fa-solid fa-lightbulb icon-3d"></i>
+                </button>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="container" id="app-container">
+        <h2 class="cascade-item item-1">
+            <i class="fa-solid fa-box-open icon-3d" style="color: var(--cyan);"></i>SRO 4.3 Ultra
+        </h2>
+        
+        <div class="input-group">
+            <input type="text" id="trackingCode" class="cascade-item item-2" placeholder="Código (Ex: AB123456789BR)" maxlength="13" autocomplete="off">
+            
+            <button id="scanBtn" class="cascade-item item-3 btn-scan" onclick="openScanner()">
+                <i class="fa-solid fa-barcode icon-3d" style="color: #00E676;"></i> Ler por Câmera
+            </button>
+
+            <button id="trackBtn" class="cascade-item item-4" onclick="trackPackage()">
+                <i class="fa-solid fa-magnifying-glass icon-3d"></i> Buscar Objeto
+            </button>
+        </div>
+        
+        <div id="loading" class="loading">
+            <div class="loading-text">
+                <i class="fa-solid fa-satellite-dish icon-3d" style="margin-right: 8px;"></i> Consultando base...
+            </div>
+            <div class="loading-bar-track">
+                <div class="loading-bar-fill"></div>
+            </div>
+        </div>
+        
+        <div id="result-wrapper" class="result-wrapper" style="display: none;">
+            <div id="result"></div>
+        </div>
+    </div>
+
+            <div class="developer-mark main-mark">
+        <div class="mark-name">TARCIZO PALHARES</div>
+        <div class="mark-title">DEVELOPER</div>
+            </div>
+        
+    <div id="history-modal" class="modal-overlay">
+        <div class="modal-content">
+                        <button class="modal-close" onclick="closeHistoryModal()">
+                <i class="fa-solid fa-arrow-left"></i> Voltar ao SRO
+            </button>
+            
+            <iframe id="history-iframe" src="" frameborder="0"></iframe>
+        </div>
+    </div>
+    
+    <script>
+                /* =========================================================
+           REGISTRO DO SERVICE WORKER (PWA)
+           ========================================================= */
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                // Lembre-se: o caminho precisa corresponder ao seu repositório
+                navigator.serviceWorker.register('/SRO/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registrado com sucesso no escopo:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('Falha ao registrar o Service Worker:', error);
+                    });
+            });
+        }
+              /* =========================================================
+           MOTOR HAPTIC & SINTETIZADOR DE ÁUDIO 3D (Native API)
+           ========================================================= */
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let startupPlayed = false;
+
+        // Função super agressiva para forçar o desbloqueio do áudio no celular
+        const initAudioEngine = () => {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume().then(() => {
+                    if (!startupPlayed) {
+                        playStartupSound();
+                        startupPlayed = true;
+                    }
+                });
+            } else if (!startupPlayed) {
+                playStartupSound();
+                startupPlayed = true;
+            }
+        };
+
+        // Escuta múltiplos tipos de toque para garantir que o Chrome/Android libere o som
+        ['click', 'touchstart', 'keydown', 'pointerdown'].forEach(evt => {
+            document.addEventListener(evt, initAudioEngine, { once: true });
+        });
+
+        function playTickSound() {
+            if (audioCtx.state === 'suspended') return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            
+            osc.type = 'sine'; 
+            osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.04); 
+            
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); 
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.04);
+            
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+        }
+
+        function playStartupSound() {
+            if (audioCtx.state === 'suspended') return;
+            const time = audioCtx.currentTime;
+            
+            const playNote = (freq, startTime, duration) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                
+                gain.gain.setValueAtTime(0, startTime);
+                gain.gain.linearRampToValueAtTime(0.15, startTime + 0.05); 
+                gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration); 
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(startTime);
+                osc.stop(startTime + duration);
+            };
+
+            playNote(880, time, 0.6);        
+            playNote(1108.73, time + 0.1, 0.8); 
+        }
+
+        function playScannerSuccessSound() {
+            if (audioCtx.state === 'suspended') return;
+            const time = audioCtx.currentTime;
+            
+            const playBeep = (startTime) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'square'; 
+                osc.frequency.setValueAtTime(1760, startTime); 
+                
+                gain.gain.setValueAtTime(0.05, startTime);
+                gain.gain.setValueAtTime(0, startTime + 0.1);
+                
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(startTime);
+                osc.stop(startTime + 0.1);
+            };
+
+            playBeep(time);
+            playBeep(time + 0.15); 
+        }
+
+        function triggerHaptic(pattern = 15) {
+            if (navigator.vibrate) {
+                navigator.vibrate(pattern);
+            }
+        }
+
+        function playFeedback() {
+            // Força o desbloqueio caso o navegador tenha suspendido o áudio novamente
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            playTickSound();
+            triggerHaptic(15); 
+        }
+
+        // Trocamos 'pointerdown' por 'click' e 'touchstart' para funcionar perfeitamente em telas touch
+        ['click', 'touchstart'].forEach(evt => {
+            document.addEventListener(evt, (e) => {
+                const isClickable = e.target.closest('button, a');
+                if (isClickable) {
+                    playFeedback();
+                }
+            }, { passive: true });
+        });
+
+        document.addEventListener('input', (e) => {
+            if (e.target.tagName.toLowerCase() === 'input') {
+                playFeedback();
+            }
+        });
+        
+        /* =========================================================
+           LÓGICA ORIGINAL DO APLICATIVO
+           ========================================================= */
+        
+
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const splashScreen = document.getElementById('splash-screen');
+            const appContainer = document.getElementById('app-container');
+
+            setTimeout(() => {
+                if(splashScreen) {
+                    splashScreen.style.opacity = '0';
+                    splashScreen.style.transform = 'scale(1.1)'; 
+
+                    setTimeout(() => {
+                        splashScreen.style.display = 'none';
+                        if(appContainer) {
+                            appContainer.style.opacity = '1';
+                            appContainer.classList.add('start-cascade');
+                        }
+                    }, 800);
+                }
+            }, 2000);
+        });
+
+        let html5QrCode;
+        let isTorchOn = false; 
+
+        function openScanner() {
+            const modal = document.getElementById('scanner-modal');
+            modal.classList.add('show');
+
+            if (typeof Html5Qrcode === "undefined") {
+                alert("A biblioteca da câmera ainda está carregando ou foi bloqueada.");
+                closeScanner();
+                return;
+            }
+
+            html5QrCode = new Html5Qrcode("reader");
+
+            html5QrCode.start(
+                { facingMode: "environment" }, 
+                {
+                    fps: 15,
+                    qrbox: function(viewfinderWidth, viewfinderHeight) {
+                        const w = Math.floor(viewfinderWidth * 0.9);
+                        const h = Math.floor(w * 0.35);
+                        return { width: w, height: h };
+                    }
+                },
+                (decodedText, decodedResult) => {
+                    playScannerSuccessSound();
+                    triggerHaptic([50, 50, 50]); 
+                    
+                    document.getElementById('trackingCode').value = decodedText; 
+                    closeScanner(); 
+                    trackPackage(); 
+                },
+                (errorMessage) => { }
+            ).then(() => {
+                html5QrCode.applyVideoConstraints({
+                    advanced: [{ zoom: 2.0 }]
+                }).catch(err => {
+                    console.log("Zoom nativo inicial não suportado:", err);
+                });
+            }).catch((err) => {
+                alert("Erro ao iniciar a câmera ao vivo. Para que a leitura de códigos funcione diretamente, a página precisa estar em um site seguro (HTTPS) ou em modo localhost.");
+                closeScanner();
+            });
+        }
+
+        async function toggleTorch() {
+            const video = document.querySelector("#reader video");
+            if (!video || !video.srcObject) {
+                alert("A câmera não inicializou corretamente.");
+                return;
+            }
+
+            const track = video.srcObject.getVideoTracks()[0];
+            if (!track) return;
+
+            isTorchOn = !isTorchOn;
+
+            try {
+                await track.applyConstraints({
+                    advanced: [{ torch: isTorchOn, zoom: 2.0 }]
+                });
+                
+                const torchBtn = document.getElementById('torchBtn');
+                if (isTorchOn) {
+                    torchBtn.classList.add('active');
+                } else {
+                    torchBtn.classList.remove('active');
+                }
+            } catch (err1) {
+                try {
+                    await track.applyConstraints({
+                        advanced: [{ torch: isTorchOn }]
+                    });
+                    
+                    const torchBtn = document.getElementById('torchBtn');
+                    if (isTorchOn) {
+                        torchBtn.classList.add('active');
+                    } else {
+                        torchBtn.classList.remove('active');
+                    }
+                } catch (err2) {
+                    alert("O sistema do seu celular impediu o site de acender a lanterna. Isso pode acontecer se a permissão não foi concedida ou se o dispositivo bloqueia este comando via web.");
+                    isTorchOn = !isTorchOn; 
+                }
+            }
+        }
+
+        function closeScanner() {
+            const modal = document.getElementById('scanner-modal');
+            
+            isTorchOn = false;
+            document.getElementById('torchBtn').classList.remove('active');
+
+            if(html5QrCode) {
+                html5QrCode.stop().then(() => {
+                    modal.classList.remove('show');
+                }).catch(err => {
+                    modal.classList.remove('show');
+                });
+            } else {
+                modal.classList.remove('show');
+            }
+        }
+
+        const API_TOKEN = 'sr_live_6xpHxAJPw7cdTXXLQEhByqfpOlXgBCAFmbBk-FsA4Dw'; 
+        const API_URL = 'https://seurastreio.com.br/api/public/rastreio/';
+
+        async function trackPackage() {
+            const codeInput = document.getElementById('trackingCode');
+            const code = codeInput.value.trim().toUpperCase();
+            const wrapperDiv = document.getElementById('result-wrapper');
+            const resultDiv = document.getElementById('result');
+            const loadingDiv = document.getElementById('loading');
+            
+            if (!code || code.length < 9) {
+                alert('Por favor, informe um código de rastreio válido.');
+                return;
+            }
+
+            if (wrapperDiv.style.display === 'block') {
+                wrapperDiv.classList.add('screen-exit');
+                await new Promise(r => setTimeout(r, 300));
+            }
+
+            wrapperDiv.style.display = 'none';
+            resultDiv.innerHTML = '';
+            wrapperDiv.classList.remove('screen-exit');
+            
+            loadingDiv.style.display = 'block';
+
+            try {
+                const response = await fetch(`${API_URL}${code}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${API_TOKEN}`,
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.status === 401) {
+                    let errorMessage = 'Erro de Autenticação: Verifique sua Chave de API.';
+                    if (data.helpUrl) errorMessage += `\nObtenha uma chave em: ${data.helpUrl}`;
+                    throw new Error(errorMessage);
+                }
+                if (response.status === 429) {
+                    throw new Error('Limite de consultas atingido. Tente novamente mais tarde.');
+                }
+                if (!data.success) {
+                    throw new Error(data.message || 'Objeto não encontrado ou aguardando atualização.');
+                }
+
+                renderResult(data);
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="timeline-item error" style="animation-delay: 0.1s">
+                        <div class="status-header">
+                            <i class="fa-solid fa-triangle-exclamation icon-3d" style="color: #ff4d4d;"></i>
+                            <div class="status-title">Atenção</div>
+                        </div>
+                        <div class="status-loc">${error.message}</div>
+                    </div>`;
+            } finally {
+                loadingDiv.style.display = 'none';
+                wrapperDiv.style.display = 'block';
+            }
+        }
+
+        function renderResult(data) {
+            const container = document.getElementById('result');
+            let html = '';
+
+            if (data && data.eventos && data.eventos.length > 0) {
+                html += `
+                    <div class="current-status-display">
+                        <h3 style="color: #00E676; text-shadow: 0 2px 4px rgba(0,0,0,0.8);"><i class="fa-solid fa-box-check icon-3d" style="margin-right:8px;"></i>${data.eventos[0].status}</h3>
+                    </div>
+                `;
+
+                data.eventos.forEach((evento, index) => {
+                    const isLatest = index === 0;
+                    const itemClass = isLatest ? 'timeline-item latest' : 'timeline-item';
+                    const icon = isLatest ? 'fa-solid fa-truck-fast icon-3d' : 'fa-solid fa-box icon-3d';
+                    const iconColor = isLatest ? '#00BFFF' : '#FFD700';
+
+                    html += `
+                        <div class="${itemClass}" style="animation-delay: ${index * 0.15}s">
+                            <div class="status-header">
+                                <i class="${icon}" style="color: ${iconColor};"></i>
+                                <div class="status-title">${evento.status}</div>
+                            </div>
+                            <div class="status-date"><i class="fa-regular fa-clock icon-3d" style="margin-right: 5px;"></i>${evento.data} às ${evento.hora}</div>
+                            <div class="status-loc"><i class="fa-solid fa-location-dot icon-3d" style="margin-right: 5px;"></i>${evento.local}</div>
+                        </div>`;
+                });
+            } else if (data && data.eventoMaisRecente) {
+                html += `
+                    <div class="timeline-item" style="animation-delay: 0.1s">
+                        <div class="status-header">
+                            <i class="fa-solid fa-circle-info icon-3d" style="color: #FFD700;"></i>
+                            <div class="status-title" style="color: #FFD700;">Atenção</div>
+                        </div>
+                        <div class="status-loc">Evento mais recente: ${data.eventoMaisRecente.descricao}</div>
+                 
+                                                <a onclick="openHistoryModal('https://rastreiom3d-uknmeegv.manus.space/rastrear/' + document.getElementById('trackingCode').value.trim())" class="full-history-link" style="margin-top: 15px; cursor: pointer;">
+                            <i class="fa-solid fa-up-right-from-square icon-3d"></i> Ver Histórico
+                        </a>
+                        
+                    </div>`;
+            } else {
+                html += `
+                    <div class="timeline-item error" style="animation-delay: 0.1s">
+                        <div class="status-header">
+                            <i class="fa-solid fa-circle-xmark icon-3d" style="color: #ff4d4d;"></i>
+                            <div class="status-title">Atenção</div>
+                        </div>
+                        <div class="status-loc">Objeto não encontrado ou aguardando atualização no sistema.</div>
+                    </div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        document.getElementById('trackingCode').addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                this.blur();
+                trackPackage();
+            }
+        });
+                /* =========================================================
+           FUNÇÕES DO NAVEGADOR INTERNO (MODAL DO HISTÓRICO)
+           ========================================================= */
+        function openHistoryModal(url) {
+            const modal = document.getElementById('history-modal');
+            const iframe = document.getElementById('history-iframe');
+            iframe.src = url; 
+            modal.classList.add('active'); 
+            if (typeof playFeedback === 'function') playFeedback();
+        }
+
+        function closeHistoryModal() {
+            const modal = document.getElementById('history-modal');
+            const iframe = document.getElementById('history-iframe');
+            modal.classList.remove('active'); 
+            setTimeout(() => { iframe.src = ""; }, 300); 
+            if (typeof playFeedback === 'function') playFeedback();
+        }
+
+        /* =========================================================
+           PARTÍCULAS DE FUNDO ANIMADAS
+           ========================================================= */
+        (function() {
+            const canvas = document.getElementById('particles-canvas');
+            const ctx = canvas.getContext('2d');
+            const colors = ['rgba(0,191,255,', 'rgba(0,230,118,', 'rgba(255,215,0,'];
+
+            function resize() {
+                canvas.width  = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            const particles = Array.from({ length: 55 }, () => ({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                r: Math.random() * 1.5 + 0.3,
+                dx: (Math.random() - 0.5) * 0.35,
+                dy: (Math.random() - 0.5) * 0.35,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                alpha: Math.random() * 0.35 + 0.05,
+            }));
+
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                particles.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color + p.alpha + ')';
+                    ctx.fill();
+                    p.x += p.dx;
+                    p.y += p.dy;
+                    if (p.x < 0 || p.x > canvas.width)  p.dx *= -1;
+                    if (p.y < 0 || p.y > canvas.height) p.dy *= -1;
+                });
+                requestAnimationFrame(draw);
+            }
+            draw();
+        })();
+        
+    </script>
+</body>
+</html>
+
+
+
+
+
+
+
